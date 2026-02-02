@@ -199,12 +199,7 @@ class UserViewSet(viewsets.ViewSet):
 
 class LeaderboardView(views.APIView):
     def get(self, request):
-        cache_key = 'leaderboard_data_v1'
-        cached_data = cache.get(cache_key)
-
-        if cached_data:
-            return Response(cached_data)
-
+        # Demo Mode: Calculate instantly without caching
         try:
             time_threshold = timezone.now() - timedelta(hours=24)
 
@@ -231,7 +226,6 @@ class LeaderboardView(views.APIView):
                 for idx, l in enumerate(leaders)
             ]
             
-            cache.set(cache_key, data, 60)
             return Response(data)
             
         except Exception as e:

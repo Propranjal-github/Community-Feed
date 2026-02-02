@@ -102,7 +102,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     fetchLeaderboard();
-    const interval = setInterval(fetchLeaderboard, 60000);
+    const interval = setInterval(fetchLeaderboard, 3000); // Poll every 3 seconds for demo
     return () => clearInterval(interval);
   }, [fetchLeaderboard]);
 

@@ -170,34 +170,30 @@ export const api = {
     await new Promise(r => setTimeout(r, 200));
     const key = `${type.toLowerCase()}_${targetId}`;
     
-    if (USER_LIKES.has(key)) {
-      USER_LIKES.delete(key);
-      if (type === 'POST') {
-        const p = POSTS_DB.find(x => x.id === targetId);
-        if (p) p.likes--;
-        return { success: true, newLikes: p?.likes || 0 };
-      } else {
-        const c = COMMENTS_DB.find(x => x.id === targetId);
-        if (c) c.likes--;
-        return { success: true, newLikes: c?.likes || 0 };
-      }
+    let isUnlike = USER_LIKES.has(key);
+    let amount = type === 'POST' ? 5 : 1;
+    if (isUnlike) {
+        USER_LIKES.delete(key);
+        amount = -amount; // Negative Karma for unlink
+    } else {
+        USER_LIKES.add(key);
     }
 
-    USER_LIKES.add(key);
     let authorId = '';
-    
+    let newLikes = 0;
+
     if (type === 'POST') {
       const p = POSTS_DB.find(x => x.id === targetId);
       if (!p) return { success: false, newLikes: 0 };
-      p.likes++;
+      p.likes += (isUnlike ? -1 : 1);
+      newLikes = p.likes;
       authorId = p.authorId;
-      return { success: true, newLikes: p.likes };
     } else {
       const c = COMMENTS_DB.find(x => x.id === targetId);
       if (!c) return { success: false, newLikes: 0 };
-      c.likes++;
+      c.likes += (isUnlike ? -1 : 1);
+      newLikes = c.likes;
       authorId = c.authorId;
-      return { success: true, newLikes: c.likes };
     }
     
     KARMA_LOG.push({
@@ -205,9 +201,11 @@ export const api = {
       userId: authorId,
       sourceId: targetId,
       sourceType: type,
-      amount: type === 'POST' ? 5 : 1,
+      amount: amount,
       timestamp: Date.now()
     });
+
+    return { success: true, newLikes };
   },
   
   getCurrentUser: () => CURRENT_USER_ID ? USERS[CURRENT_USER_ID] : null
