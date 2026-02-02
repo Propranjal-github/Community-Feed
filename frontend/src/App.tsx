@@ -5,7 +5,7 @@ import { CreatePostModal } from './components/CreatePostModal';
 import { AuthModal } from './components/AuthModal';
 import { api } from './services/api'; 
 import { Post, LeaderboardEntry } from './types';
-import { Flame, PlusCircle, Search, Loader2, ArrowDownCircle, LogOut, LogIn, UserPlus } from 'lucide-react';
+import { Flame, PlusCircle, Search, ArrowDownCircle, LogOut } from 'lucide-react';
 
 const PAGE_SIZE = 10;
 

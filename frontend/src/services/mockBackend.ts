@@ -36,7 +36,7 @@ const USER_LIKES = new Set<string>();
 
 export const api = {
   // MOCK AUTH
-  login: async (u: string, p: string): Promise<User> => {
+  login: async (u: string, _p: string): Promise<User> => {
      await new Promise(r => setTimeout(r, 600));
      if (u === 'fail') throw new Error("Invalid");
      CURRENT_USER_ID = 'u1'; // Force u1 login
@@ -44,7 +44,7 @@ export const api = {
      return USERS['u1'];
   },
 
-  signup: async (u: string, p: string): Promise<User> => {
+  signup: async (u: string, _p: string): Promise<User> => {
      await new Promise(r => setTimeout(r, 600));
      const newId = `u${Date.now()}`;
      USERS[newId] = {
