@@ -284,29 +284,6 @@ const App: React.FC = () => {
               entries={leaderboard} 
               loading={loadingLeaderboard} 
             />
-            
-            {/* Footer / Info */}
-            <div className="mt-8 p-4 rounded-lg bg-slate-800/50 border border-slate-800">
-               <h3 className="text-sm font-semibold text-slate-400 mb-2">System Status</h3>
-               <p className="text-xs text-slate-500 leading-relaxed">
-                 {usingFallback ? (
-                   <>
-                     Running in <strong>Offline/Mock Mode</strong>. <br/>
-                     The backend server is unreachable, so we are using local simulation data.
-                   </>
-                 ) : (
-                   <>
-                     Running in <strong>Online Mode</strong>. <br/>
-                     Connected to Django Backend. <br/>
-                     {!currentUser ? (
-                       <span>Not logged in</span>
-                     ) : (
-                       <span>Logged in as <strong className="text-emerald-400">{currentUser.username}</strong></span>
-                     )}
-                   </>
-                 )}
-               </p>
-            </div>
           </aside>
         </div>
       </div>
