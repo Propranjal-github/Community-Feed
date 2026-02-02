@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Comment } from '../types';
 import { Heart, MessageCircle, ChevronDown, ChevronUp, Send, X } from 'lucide-react';
 import { api } from '../services/api';
@@ -7,7 +7,6 @@ interface CommentNodeProps {
   comment: Comment;
   allComments: Comment[]; 
   depth?: number;
-  onUpdateLeaderboard?: () => void;
   refreshFeed?: () => void;
 }
 
@@ -15,7 +14,6 @@ export const CommentNode: React.FC<CommentNodeProps> = ({
   comment, 
   allComments, 
   depth = 0,
-  onUpdateLeaderboard,
   refreshFeed
 }) => {
   const [likes, setLikes] = useState(comment.likes);
@@ -26,6 +24,12 @@ export const CommentNode: React.FC<CommentNodeProps> = ({
   const [isReplying, setIsReplying] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Sync state with props when feed refreshes to avoid stale "liked" status
+  useEffect(() => {
+    setLikes(comment.likes);
+    setHasLiked(comment.hasLiked);
+  }, [comment.likes, comment.hasLiked]);
 
   const children = allComments.filter(c => c.parentId === comment.id);
 
@@ -48,7 +52,6 @@ export const CommentNode: React.FC<CommentNodeProps> = ({
       } else {
          throw new Error("Failed");
       }
-      if (onUpdateLeaderboard) onUpdateLeaderboard();
     } catch (e) {
       setLikes(prevLikes);
       setHasLiked(prevHasLiked);
@@ -191,7 +194,6 @@ export const CommentNode: React.FC<CommentNodeProps> = ({
                    comment={child} 
                    allComments={allComments}
                    depth={depth + 1}
-                   onUpdateLeaderboard={onUpdateLeaderboard}
                    refreshFeed={refreshFeed}
                  />
                ))}

@@ -248,7 +248,6 @@ const App: React.FC = () => {
                     <PostCard 
                       key={post.id} 
                       post={post} 
-                      onUpdateLeaderboard={fetchLeaderboard}
                       refreshFeed={() => fetchPosts()}
                     />
                   ))}

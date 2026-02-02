@@ -94,16 +94,29 @@ class PostViewSet(LikeMixin, viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         
-        has_liked_subquery = Like.objects.filter(
+        # 1. Check if user liked the POST
+        has_liked_post = Like.objects.filter(
             post=OuterRef('pk'),
             user=user
         ) if user.is_authenticated else Like.objects.none()
 
+        # 2. Check if user liked the COMMENT (for nested prefetch)
+        has_liked_comment = Like.objects.filter(
+            comment=OuterRef('pk'),
+            user=user
+        ) if user.is_authenticated else Like.objects.none()
+
+        # 3. Create Prefetch Queryset for comments that includes the hasLiked annotation
+        comments_qs = Comment.objects.select_related('author').annotate(
+            hasLiked=Exists(has_liked_comment)
+        )
+
+        # 4. Main Query
         return Post.objects.select_related('author').prefetch_related(
-            'comments', 
-            'comments__author'
+            Prefetch('comments', queryset=comments_qs),
+            # Note: 'comments__author' is handled by select_related in comments_qs
         ).annotate(
-            hasLiked=Exists(has_liked_subquery),
+            hasLiked=Exists(has_liked_post),
             comment_count_annotated=Count('comments', distinct=True)
         )
     

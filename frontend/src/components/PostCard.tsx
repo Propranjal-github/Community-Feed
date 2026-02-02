@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Post } from '../types';
 import { CommentNode } from './CommentNode';
 import { Heart, MessageSquare, Share2, MoreHorizontal, Send } from 'lucide-react';
@@ -6,11 +6,10 @@ import { api } from '../services/api';
 
 interface PostCardProps {
   post: Post;
-  onUpdateLeaderboard: () => void;
   refreshFeed?: () => void;
 }
 
-export const PostCard: React.FC<PostCardProps> = ({ post, onUpdateLeaderboard, refreshFeed }) => {
+export const PostCard: React.FC<PostCardProps> = ({ post, refreshFeed }) => {
   const [likes, setLikes] = useState(post.likes);
   const [hasLiked, setHasLiked] = useState(post.hasLiked);
   const [showComments, setShowComments] = useState(false);
@@ -18,6 +17,12 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onUpdateLeaderboard, r
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
   const currentUser = api.getCurrentUser();
+
+  // Sync state with props when feed refreshes to avoid stale "liked" status
+  useEffect(() => {
+    setLikes(post.likes);
+    setHasLiked(post.hasLiked);
+  }, [post.likes, post.hasLiked]);
 
   const handleLike = async () => {
     if (!currentUser) {
@@ -39,7 +44,6 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onUpdateLeaderboard, r
       } else {
          throw new Error("Failed");
       }
-      onUpdateLeaderboard();
     } catch (e) {
       // Revert if failed (e.g., self-like prevention)
       setLikes(prevLikes);
@@ -169,7 +173,6 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onUpdateLeaderboard, r
                 key={comment.id} 
                 comment={comment} 
                 allComments={post.comments}
-                onUpdateLeaderboard={onUpdateLeaderboard}
                 refreshFeed={refreshFeed}
               />
             ))}
