@@ -1,0 +1,5 @@
+{
+  "name": "Playto Community Feed",
+  "description": "A high-performance threaded community feed with real-time 24h leaderboard calculations, designed to demonstrate N+1 efficiency and complex aggregation logic.",
+  "requestFramePermissions": []
+}

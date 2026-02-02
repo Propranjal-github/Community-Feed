@@ -1,0 +1,54 @@
+# =========================
+# Python / Django
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.sqlite3
+db.sqlite3
+*.log
+
+# Virtual environment
+venv/
+.env
+.env.local
+
+# Django static/media (if generated)
+staticfiles/
+media/
+
+# =========================
+# Node / Vite / Frontend
+# =========================
+node_modules/
+dist/
+build/
+
+# Vite cache
+.vite/
+
+# =========================
+# Environment files
+# =========================
+frontend/.env
+frontend/.env.local
+backend/.env
+
+# =========================
+# TypeScript
+# =========================
+*.tsbuildinfo
+
+# =========================
+# Editor / OS junk
+# =========================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# =========================
+# Docker (optional safety)
+# =========================
+*.env.docker

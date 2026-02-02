@@ -1,0 +1,9 @@
+{
+  "name": "playto-root",
+  "private": true,
+  "scripts": {
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "start-backend": "cd backend && python manage.py runserver"
+  }
+}
