@@ -23,6 +23,9 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, loading }) =>
 
       <p className="text-xs text-slate-400 mb-6 leading-relaxed">
         Points earned from likes on posts (5pts) and comments (1pt) within the rolling 24-hour window.
+        <span className="block mt-1 text-emerald-500/80 font-medium">
+           • Refreshes every 15 seconds
+        </span>
       </p>
 
       {loading ? (
