@@ -1,6 +1,6 @@
 import { Post, User, LeaderboardEntry, KarmaTransaction } from '../types';
 
-let CURRENT_USER_ID = 'u1';
+let CURRENT_USER_ID: string | null = null; // Start logged out
 
 const USERS: Record<string, User> = {
   'u1': { id: 'u1', username: 'DevWizard', avatarUrl: 'https://picsum.photos/seed/u1/200' },
@@ -57,13 +57,12 @@ export const api = {
   },
 
   logout: async () => {
-    CURRENT_USER_ID = `guest_${Date.now()}`;
-    USERS[CURRENT_USER_ID] = { id: CURRENT_USER_ID, username: 'Guest_Mock', avatarUrl: '' };
+    CURRENT_USER_ID = null;
   },
 
   updateUsername: async (username: string): Promise<User> => {
     await new Promise(r => setTimeout(r, 400));
-    if (USERS[CURRENT_USER_ID]) {
+    if (CURRENT_USER_ID && USERS[CURRENT_USER_ID]) {
       USERS[CURRENT_USER_ID].username = username;
       return USERS[CURRENT_USER_ID];
     }
@@ -71,6 +70,7 @@ export const api = {
   },
 
   createPost: async (content: string): Promise<Post> => {
+    if (!CURRENT_USER_ID) throw new Error("Auth required");
     await new Promise(r => setTimeout(r, 600));
     const newPost = {
       id: `p${Math.random().toString(36).substr(2, 9)}`,
@@ -91,6 +91,7 @@ export const api = {
   },
 
   createComment: async (postId: string, content: string, parentId?: string | null): Promise<boolean> => {
+     if (!CURRENT_USER_ID) return false;
      await new Promise(r => setTimeout(r, 400));
      const newComment = {
        id: `c${Math.random().toString(36).substr(2, 9)}`,
@@ -165,6 +166,7 @@ export const api = {
   },
 
   toggleLike: async (targetId: string, type: 'POST' | 'COMMENT'): Promise<{ success: boolean; newLikes: number }> => {
+    if (!CURRENT_USER_ID) throw new Error("Auth required");
     await new Promise(r => setTimeout(r, 200));
     const key = `${type.toLowerCase()}_${targetId}`;
     
@@ -208,5 +210,5 @@ export const api = {
     });
   },
   
-  getCurrentUser: () => USERS[CURRENT_USER_ID]
+  getCurrentUser: () => CURRENT_USER_ID ? USERS[CURRENT_USER_ID] : null
 };

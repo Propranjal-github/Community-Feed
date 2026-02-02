@@ -16,33 +16,15 @@ from .serializers import PostSerializer, CommentSerializer, UserSerializer
 
 logger = logging.getLogger(__name__)
 
-def get_actual_user(request):
-    """
-    Returns the authenticated user, or creates/retrieves a Guest User based on the session.
-    """
-    if request.user.is_authenticated:
-        return request.user
-    
-    try:
-        if not request.session.session_key:
-            request.session.create()
-    except Exception as e:
-        logger.error(f"Session creation failed: {e}")
-        return User(username="Guest_Error", id=-1)
-    
-    guest_username = f"Guest_{request.session.session_key[:6]}"
-    user, created = User.objects.get_or_create(username=guest_username)
-    return user
-
 class LikeMixin:
     """
     Shared logic for liking Posts and Comments.
     """
     def _perform_like(self, request, post_id=None, comment_id=None, karma_value=0):
-        user = get_actual_user(request)
-        if user.id == -1:
-             return Response({'error': 'System busy, try again later.'}, status=503)
+        if not request.user.is_authenticated:
+            return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
         
+        user = request.user
         target_model = Post if post_id else Comment
         target_id = post_id if post_id else comment_id
 
@@ -101,7 +83,7 @@ class LikeMixin:
 
 class PostViewSet(LikeMixin, viewsets.ModelViewSet):
     serializer_class = PostSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     pagination_class = None # CLIENT-SIDE PAGINATION: Disable DRF pagination
 
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -139,8 +121,7 @@ class PostViewSet(LikeMixin, viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def perform_create(self, serializer):
-        user = get_actual_user(self.request)
-        serializer.save(author=user)
+        serializer.save(author=self.request.user)
 
     @action(detail=True, methods=['post'])
     def like(self, request, pk=None):
@@ -150,11 +131,10 @@ class PostViewSet(LikeMixin, viewsets.ModelViewSet):
 class CommentViewSet(LikeMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def perform_create(self, serializer):
-        user = get_actual_user(self.request)
-        serializer.save(author=user)
+        serializer.save(author=self.request.user)
 
     @action(detail=True, methods=['post'])
     def like(self, request, pk=None):
@@ -167,10 +147,16 @@ class UserViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'])
     def me(self, request):
         csrf_token = get_token(request)
-        user = get_actual_user(request)
-        serializer = UserSerializer(user)
+        if not request.user.is_authenticated:
+            return Response({
+                'isAuthenticated': False, 
+                'user': None,
+                'csrfToken': csrf_token
+            })
+
+        serializer = UserSerializer(request.user)
         return Response({
-            'isAuthenticated': user.id != -1, 
+            'isAuthenticated': True, 
             'user': serializer.data,
             'csrfToken': csrf_token
         })

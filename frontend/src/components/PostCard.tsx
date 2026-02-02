@@ -17,7 +17,14 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onUpdateLeaderboard, r
   const [commentText, setCommentText] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
+  const currentUser = api.getCurrentUser();
+
   const handleLike = async () => {
+    if (!currentUser) {
+       window.dispatchEvent(new Event('auth-required'));
+       return;
+    }
+
     const prevLikes = likes;
     const prevHasLiked = hasLiked;
 
@@ -46,6 +53,11 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onUpdateLeaderboard, r
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!commentText.trim()) return;
+
+    if (!currentUser) {
+        window.dispatchEvent(new Event('auth-required'));
+        return;
+    }
 
     setIsSubmittingComment(true);
     try {
@@ -116,14 +128,28 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onUpdateLeaderboard, r
 
       {showComments && (
         <div className="bg-slate-900/50 p-5 border-t border-slate-700/50 animate-in fade-in slide-in-from-top-2 duration-200">
-           <form onSubmit={handleCommentSubmit} className="flex gap-3 mb-6">
-              <div className="w-8 h-8 rounded-full bg-emerald-600 flex-shrink-0 flex items-center justify-center text-xs font-bold text-white">ME</div>
+           <form onSubmit={handleCommentSubmit} className="flex gap-3 mb-6 relative group">
+              {currentUser ? (
+                <img 
+                  src={currentUser.avatarUrl} 
+                  className="w-8 h-8 rounded-full border border-slate-700 flex-shrink-0" 
+                  alt="Me" 
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-slate-700 flex-shrink-0" />
+              )}
+              
               <div className="flex-1 relative">
                 <input 
                   type="text" 
-                  placeholder="Write a comment..." 
+                  placeholder={currentUser ? "Write a comment..." : "Log in to comment..."}
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
+                  onFocus={() => {
+                      if (!currentUser) {
+                          window.dispatchEvent(new Event('auth-required'));
+                      }
+                  }}
                   disabled={isSubmittingComment}
                   className="w-full bg-slate-800 border-none rounded-lg px-4 py-2 pr-10 text-sm text-slate-200 focus:ring-2 focus:ring-emerald-500/50 outline-none placeholder-slate-500"
                 />

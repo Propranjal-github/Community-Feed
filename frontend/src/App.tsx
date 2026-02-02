@@ -40,6 +40,13 @@ const App: React.FC = () => {
     init();
   }, []);
 
+  // Listen for global auth triggers
+  useEffect(() => {
+    const handleAuthRequired = () => openAuth('login');
+    window.addEventListener('auth-required', handleAuthRequired);
+    return () => window.removeEventListener('auth-required', handleAuthRequired);
+  }, []);
+
   // Fetch Feed Wrapper
   const fetchPosts = useCallback(async () => {
     setLoadingPosts(true);
@@ -111,8 +118,15 @@ const App: React.FC = () => {
     setIsAuthModalOpen(true);
   };
 
+  const handleCreatePostClick = () => {
+    if (!api.getCurrentUser()) {
+      openAuth('login');
+      return;
+    }
+    setIsCreateModalOpen(true);
+  };
+
   const currentUser = api.getCurrentUser();
-  const isGuest = currentUser.username.startsWith('Guest_');
   const hasMore = displayedPosts.length < allPosts.length;
 
   return (
@@ -148,7 +162,7 @@ const App: React.FC = () => {
 
             <div className="flex items-center gap-4">
               <button 
-                onClick={() => setIsCreateModalOpen(true)}
+                onClick={handleCreatePostClick}
                 className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2"
               >
                 <PlusCircle size={16} />
@@ -156,7 +170,7 @@ const App: React.FC = () => {
               </button>
               
               <div className="flex items-center gap-3 pl-4 border-l border-slate-700">
-                 {isGuest ? (
+                 {!currentUser ? (
                    <div className="flex items-center gap-2">
                       <button 
                         onClick={() => openAuth('login')}
@@ -285,8 +299,8 @@ const App: React.FC = () => {
                    <>
                      Running in <strong>Online Mode</strong>. <br/>
                      Connected to Django Backend. <br/>
-                     {isGuest ? (
-                       <span>Logged in as <strong>Guest</strong></span>
+                     {!currentUser ? (
+                       <span>Not logged in</span>
                      ) : (
                        <span>Logged in as <strong className="text-emerald-400">{currentUser.username}</strong></span>
                      )}

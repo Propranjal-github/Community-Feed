@@ -30,6 +30,11 @@ export const CommentNode: React.FC<CommentNodeProps> = ({
   const children = allComments.filter(c => c.parentId === comment.id);
 
   const handleLike = async () => {
+    if (!api.getCurrentUser()) {
+        window.dispatchEvent(new Event('auth-required'));
+        return;
+    }
+
     const prevLikes = likes;
     const prevHasLiked = hasLiked;
 
@@ -49,6 +54,14 @@ export const CommentNode: React.FC<CommentNodeProps> = ({
       setHasLiked(prevHasLiked);
       alert("You cannot vote on your own comment.");
     }
+  };
+
+  const handleReplyClick = () => {
+    if (!api.getCurrentUser()) {
+        window.dispatchEvent(new Event('auth-required'));
+        return;
+    }
+    setIsReplying(!isReplying);
   };
 
   const handleReplySubmit = async (e: React.FormEvent) => {
@@ -121,7 +134,7 @@ export const CommentNode: React.FC<CommentNodeProps> = ({
                     {likes}
                   </button>
                   <button 
-                    onClick={() => setIsReplying(!isReplying)}
+                    onClick={handleReplyClick}
                     className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${
                       isReplying ? 'text-emerald-400' : 'text-slate-500 hover:text-slate-300'
                     }`}
