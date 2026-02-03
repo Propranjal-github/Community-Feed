@@ -47,9 +47,7 @@ ROOT_URLCONF = 'playto_config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            BASE_DIR / '../frontend/dist', # PRODUCTION: Location of React index.html
-        ],
+        'DIRS': [], # Decoupled: No longer pointing to frontend/dist
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -98,10 +96,8 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Include React Assets in collectstatic
-STATICFILES_DIRS = [
-    BASE_DIR / '../frontend/dist', 
-]
+# Decoupled: No longer including React assets
+STATICFILES_DIRS = []
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -155,3 +151,10 @@ if not DEBUG:
     SESSION_COOKIE_SAMESITE = 'None'
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
+else:
+    # LOCAL DEVELOPMENT
+    # Explicitly set Lax to avoid inconsistencies between browsers handling "unspecified"
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
