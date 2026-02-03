@@ -88,7 +88,7 @@ const App: React.FC = () => {
     fetchPosts();
   }, [fetchPosts]);
 
-  // Fetch Leaderboard
+  // Fetch Leaderboard with sequential polling
   const fetchLeaderboard = useCallback(async () => {
     if (leaderboard.length === 0) setLoadingLeaderboard(true); 
     try {
@@ -101,9 +101,23 @@ const App: React.FC = () => {
   }, [leaderboard.length]);
 
   useEffect(() => {
-    fetchLeaderboard();
-    const interval = setInterval(fetchLeaderboard, 15000); // Poll every 15 seconds
-    return () => clearInterval(interval);
+    let isMounted = true;
+    let timer: any;
+
+    const poll = async () => {
+      await fetchLeaderboard();
+      if (isMounted) {
+        // Schedule next poll only after the previous one completes
+        timer = setTimeout(poll, 15000);
+      }
+    };
+
+    poll();
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
   }, [fetchLeaderboard]);
 
   const handleLogout = async () => {

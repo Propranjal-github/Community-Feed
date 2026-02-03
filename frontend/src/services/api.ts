@@ -7,7 +7,8 @@ let currentUserCache: User | null = null;
 let useMock = false;
 let csrfTokenCache: string | null = null;
 
-const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeout = 5000) => {
+// Increased timeout to 2 minutes (120000ms) for Render cold starts
+const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeout = 120000) => {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
   try {
@@ -149,7 +150,7 @@ export const api = {
       const response = await fetchWithTimeout(`${API_BASE}/api/posts/?${params.toString()}`, {
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
-      });
+      }); // Uses default 120s timeout
       if (!response.ok) throw new Error('Network response not ok');
       return await response.json();
     } catch (e) {
@@ -202,7 +203,7 @@ export const api = {
     try {
       const response = await fetchWithTimeout(`${API_BASE}/api/leaderboard/`, {
         credentials: 'include'
-      }, 3000); 
+      }, 120000); // 2 minutes timeout
       if (!response.ok) throw new Error('Network response not ok');
       return await response.json();
     } catch (e) {
@@ -242,7 +243,7 @@ export const api = {
     try {
       const response = await fetchWithTimeout(`${API_BASE}/api/users/me/`, { 
         credentials: 'include'
-      }, 3000);
+      }, 120000); 
 
       if (response.ok) {
         const data = await response.json();
