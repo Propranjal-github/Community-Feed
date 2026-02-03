@@ -2,6 +2,8 @@
 
 A high-performance threaded community feed with real-time 24h leaderboard calculations. Built with Django (DRF) and React.
 
+**🚀 Live Demo:** [https://community-feed-rho.vercel.app](https://community-feed-rho.vercel.app)
+
 ---
 
 ## ⚡️ Quick Start (Run Locally)
@@ -9,7 +11,7 @@ A high-performance threaded community feed with real-time 24h leaderboard calcul
 We have configured a root-level script to make running the frontend easy, but you will need two terminal windows to run the full stack.
 
 ### 1. Backend Setup (Terminal A)
-> **⚠️ Important:** Please use **Python 3.12.11** (or any stable version between 3.10 and 3.12). 
+> **⚠️ Important:** Please use **Python 3.12.5** (or any stable version between 3.10 and 3.12). 
 > **Do not use Python 3.13 or 3.14** yet, as they are experimental/pre-release and are not yet fully supported by Django 5.
 
 The backend uses SQLite by default, so no extra database installation is required.
@@ -44,6 +46,48 @@ npm install
 npm run dev
 ```
 *Frontend runs on: `http://localhost:5173`*
+
+---
+
+## ⚙️ Configuration (Environment Variables)
+
+The project uses `.env` files to manage configuration. We have included default files (`backend/.env` and `frontend/.env`) for local development convenience.
+
+### Backend (`backend/.env`)
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DEBUG` | Toggle debug mode | `True` |
+| `SECRET_KEY` | Django secret key | `django-insecure...` |
+| `ALLOWED_HOSTS` | Comma-separated hosts | `localhost,127.0.0.1` |
+| `DATABASE_URL` | Database connection string | (Empty = SQLite) |
+| `FRONTEND_URL` | URL for CORS/CSRF trust | `http://localhost:5173` |
+
+### Frontend (`frontend/.env`)
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `VITE_API_URL` | URL of the Django Backend | `http://localhost:8000` |
+
+---
+
+## 🐳 (Optional) Running the backend with Docker
+
+This project also includes a Docker setup for the backend as an optional bonus.
+
+**Prerequisites:**
+- Docker
+- Docker Compose
+
+**Steps:**
+1. Build the container:
+   ```bash
+   docker compose build
+   ```
+2. Start the services:
+   ```bash
+   docker compose up
+   ```
+
+The backend will be available at `http://localhost:8000`. You can then run the frontend in a separate terminal using `npm run dev` as shown above.
 
 ---
 
@@ -120,10 +164,10 @@ LIMIT 5
 ```
 This ensures the leaderboard is mathematically accurate to the second.
 
-### Hybrid Deployment
+### Deployment Strategy
 *   **Local:** Auto-detects environment and uses **SQLite**.
 *   **Production:** If `DATABASE_URL` is present, switches to **PostgreSQL**.
-*   **Serving:** Configured as a Monorepo. Django serves the React build files (`index.html`) in production, allowing for a single deployable unit.
+*   **Serving:** Decoupled architecture. Django runs as a pure API server, and React runs independently (e.g., via Vite or on Vercel).
 
 ## 📂 Project Structure
 
